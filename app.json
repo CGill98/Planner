@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Planner",
+    "slug": "Planner",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./app/assets/icon.png",
+    "splash": {
+      "image": "./app/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      
+      "config": {
+
+        "googleMobileAdsAppId": "ca-app-pub-3088532579762761~8077128583"
+      }
+    },
+
+    "android": {
+
+      "config": {
+
+        "googleMobileAdsAppId": "ca-app-pub-3088532579762761~4235259950"
+      }
+    }
+
+  }
+}
