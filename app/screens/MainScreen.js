@@ -22,10 +22,11 @@ async function testAds() {
 } 
 
 //changes the start string for the tasks
-const setID = async (id, type) => {
+const setID = async (key, id) => {
     try {
-        const IDstr = parseInt(id) 
-        await AsyncStorage.setItem(type , IDstr)
+        const IDstr = id.toString() 
+        console.log("IDstr: ", IDstr)
+        await AsyncStorage.setItem(key , IDstr)
     } catch (e) {
         // saving error
         console.log(e)
@@ -33,19 +34,25 @@ const setID = async (id, type) => {
 }
 
 const setStartID = async (id) => {
-    setID(id, "@startID")
+    setID("@startID", id)
 }
 
-const setEndId = async (id) => {
-    setID(id, "@endID")
+const setEndID = async (id) => {
+    setID("@endID", id)
 }
 
 //store an object as a string, (use to store individual tasks)
 const storeTask = async (task) => {
     try {
         const jsonValue = JSON.stringify(task)
-        let key = `@task: ${task.id}`
+        console.log("jsonValue: ",typeof jsonValue)
+        let key = `@task:${task.id}`
+        console.log("stored key: ", key)
         await AsyncStorage.setItem(key , jsonValue)
+        setEndID(task.id)
+
+        const i = await AsyncStorage.getItem(key)
+        console.log("just stored: ", i)
     } catch (e) {
         // saving error
         console.log(e)
@@ -53,38 +60,62 @@ const storeTask = async (task) => {
 }
 
 const getAllTasks = async () => {
-    console.log("get all Tasks called")
-
+    //console.log("get all Tasks called")
+    //console.log(typeof parseInt("1"))
+    
     try {
-        console.log("first try")
-        const startID = await AsyncStorage.getItem('@startID')
-        const endID = await AsyncStorage.getItem('@endID')
-        
-        if (startID === null || endID === null) {
-            console.log("start ID null")
+        //console.log("first try block")
+        let startID = parseInt(await AsyncStorage.getItem('@startID'))
+        let endID = parseInt(await AsyncStorage.getItem('@endID'))
+        let initTasks = []; //local list
+        //console.log("startID: ", startID)
+        if (typeof startID !== "number") {
+            //console.log("start ID nan")
             setStartID(0)
-            return null;
         } else {
-            console.log("start ID not null")
+            if (typeof endID !== "number") {
+                //console.log("end ID nan")
+                setEndID(0)
+            } else {
+                //console.log("start ID not null")
+                //console.log(startID)
+                //console.log(endID)
+                console.log("state-end ids: ", startID, endID)
+                
+                for (let i = startID; i <= endID; i++) {
+                    console.log(`@task:${i}`)
+                    
+                    try {
+                        let key = `@task:${i}`
+                        let jsonValue = JSON.parse(await AsyncStorage.getItem(key))
+                        console.log("jsonvalue retrieved", jsonValue)
 
-            for (let i = parseInt(startID); i <= parseInt(endID); i++) {
-                try {
-                    let key = `@task: ${task.id}`
-                    let jsonValue = await AsyncStorage.getItem(key)
+                        if (typeof jsonValue === "object" && jsonValue != null) { 
+                            console.log("jsonValue: ", jsonValue)
+                            initTasks.push(jsonValue)
+                        }
 
-                    if (jsonValue != null) { 
-                        initTasks.push(JSON.parse(jsonValue))
+                    } catch(e) {
+                        //console.log("b")
+                        console.log(e)
                     }
-
-                } catch(e) {
-                    console.log(e)
+                    
                 }
+                //console.log(initTasks)
             }
-            console.log(initTasks)
         }
+
+        return new Promise(function(resolve, reject) { 
+            if (0 < initTasks.length) {
+                resolve(initTasks)
+            } else {
+                reject("rejected")
+            }
+        })
 
     } catch(e) {
         // error reading value
+        //console.log("a")
         console.log(e)
     }
 }
@@ -93,34 +124,43 @@ const getAllTasks = async () => {
 
 function MainScreen({window}) {
     testAds()
-    
+
+    //replace below with getalltask
+    const [taskList, setTaskList] = React.useState(initTasks) //tasks stored in global map
+    const [initialised, setInitialsed] = React.useState(false)
+
+
+    if (!initialised) {
+        storeTask({id: 1, title:"new title", subTasks: [], date: false})
+        let t = {}; 
+        getAllTasks().then(function(result) {
+            console.log(result); // "Stuff worked!"
+          }).catch( function(err) {
+            console.log(err); // Error: "It broke"
+          })
+        console.log("Get All Task", t)
+        //setTimeout(function(){}, 2000)
+        setTaskList(initTasks)
+        setInitialsed(true)    
+    }
 
     let MSState = new Map();
-    const [taskList, setTaskList] = React.useState(initTasks) //tasks stored in global map
     MSState["tasks"] = [taskList, setTaskList]
     const [tasksAdded, setTasksAdded] = React.useState(0) //refreshes the flat list
     const [addingTask, setAddingTask] = React.useState(false)
     const [taskTitle, setTaskTitle] = React.useState("")
-    const [taskText, setTaskText] = React.useState("")
     const [showDatePicker, setShowDatePicker] = React.useState(false)
     const [taskDate, setTaskDate] = React.useState(false)
     const [editingTask, setEditingTask] = React.useState(-1) //the items id
-    const [numTasks, setNumTasks] = React.useState(1)
+    const [numTasks, setNumTasks] = React.useState(2)
     const [addTaskButtonTitle, setAddTaskButtonTitle] = React.useState("ADD TASK")
     const [addingSubTasks, setAddingSubTasks] = React.useState([])
     const [addNewSubTask, setAddNewSubTask] = React.useState(0)
     const [subTaskCheckMap, setSubTaskCheckMap] = React.useState({})
-    const [initialised, setInitialsed] = React.useState(false)
-
-    if (!initialised) {
-        getAllTasks()
-        setInitialsed(true)
-    }
-
     
-    //const window = [100 , 100]
-    //const window = [useWindowDimensions().width, useWindowDimensions().height]
-    //console.log("mainscreen")
+    console.log("initTasks length", initTasks.length)
+    console.log(taskList)
+
 
     function dateToString(date) {
         if (date) { //if date has been set
@@ -216,11 +256,8 @@ function MainScreen({window}) {
         newTaskList.push(newTask)
         setTaskList(newTaskList)
         storeTask(newTask)
-        setEndId(numTasks)
         setTasksAdded(tasksAdded + 1)
         setAddingTask(false)
-        
-        //setAddNewSubTask(0)
 
         //add subtask to subtask check map
         newSubTaskCheckMap = subTaskCheckMap
@@ -321,7 +358,7 @@ function MainScreen({window}) {
                     <View style={styles.taskSection}>
                         <View style={styles.taskBox}>
                             <FlatList
-                                data={MSState["tasks"][0]}
+                                data={taskList}
                                 renderItem={Task}
                                 keyExtractor={item => `${item.id}`}
                                 extraData={tasksAdded}    
@@ -338,8 +375,6 @@ function MainScreen({window}) {
         </View>
     );
 }
-
-
 
 export default MainScreen;
 
