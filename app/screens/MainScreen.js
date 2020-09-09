@@ -5,13 +5,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import {styles, addingTaskSection} from "../assets/styles.js"
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import AsyncStorage from '@react-native-community/async-storage'
+import {setStartID, setEndID, storeTask, clearTask} from '../global/LocalStorage.js'
 
 //ca-app-pub-3088532579762761~4235259950 - app id
 //ca-app-pub-3088532579762761/1376344086 - banner ad id
 //ca-app-pub-3088532579762761~8077128583 - IOS APP ID
 //ca-app-pub-3088532579762761/3946311880 - banner ad id IOS
-
-
 
 let initTasks = [{id: 0, title:"title", subTasks: [], date: false}] //
 //console.log("main screen.js")
@@ -20,7 +19,7 @@ async function testAds() {
     await setTestDeviceIDAsync('EMULATOR')
 
 } 
-
+/*
 //changes the start string for the tasks
 const setID = async (key, id) => {
     try {
@@ -57,7 +56,7 @@ const storeTask = async (task) => {
         // saving error
         console.log(e)
     }
-}
+}*/
 
 const getAllTasks = async () => {
     //console.log("get all Tasks called")
@@ -104,14 +103,15 @@ const getAllTasks = async () => {
                 //console.log(initTasks)
             }
         }
-
+        /*
         return new Promise(function(resolve, reject) { 
             if (0 < initTasks.length) {
                 resolve(initTasks)
             } else {
                 reject("rejected")
             }
-        })
+        })*/
+        return initTasks
 
     } catch(e) {
         // error reading value
@@ -122,27 +122,25 @@ const getAllTasks = async () => {
   
   
 
-function MainScreen({window}) {
+function MainScreen({window, storedTasks}) {
     testAds()
-
+    console.log("stored tasks ", storedTasks)
     //replace below with getalltask
-    const [taskList, setTaskList] = React.useState(initTasks) //tasks stored in global map
-    const [initialised, setInitialsed] = React.useState(false)
+    const [taskList, setTaskList] = React.useState(storedTasks) //tasks stored in global map
+    //const [initialised, setInitialsed] = React.useState(false)
 
-
+    /*
     if (!initialised) {
         storeTask({id: 1, title:"new title", subTasks: [], date: false})
-        let t = {}; 
-        getAllTasks().then(function(result) {
-            console.log(result); // "Stuff worked!"
-          }).catch( function(err) {
-            console.log(err); // Error: "It broke"
-          })
+         
+        var t = (async () => await getAllTasks())()
+
         console.log("Get All Task", t)
         //setTimeout(function(){}, 2000)
+        initTasks.push(t[0])
         setTaskList(initTasks)
         setInitialsed(true)    
-    }
+    }*/
 
     let MSState = new Map();
     MSState["tasks"] = [taskList, setTaskList]
@@ -152,19 +150,19 @@ function MainScreen({window}) {
     const [showDatePicker, setShowDatePicker] = React.useState(false)
     const [taskDate, setTaskDate] = React.useState(false)
     const [editingTask, setEditingTask] = React.useState(-1) //the items id
-    const [numTasks, setNumTasks] = React.useState(2)
+    const [numTasks, setNumTasks] = React.useState(taskList.length)
     const [addTaskButtonTitle, setAddTaskButtonTitle] = React.useState("ADD TASK")
     const [addingSubTasks, setAddingSubTasks] = React.useState([])
     const [addNewSubTask, setAddNewSubTask] = React.useState(0)
     const [subTaskCheckMap, setSubTaskCheckMap] = React.useState({})
     
-    console.log("initTasks length", initTasks.length)
-    console.log(taskList)
-
+    //console.log("initTasks length", initTasks.length)
+    //console.log("tasklist", taskList)
 
     function dateToString(date) {
         if (date) { //if date has been set
-            let dateString = date.toLocaleDateString()
+            
+            let dateString = typeof date === "string" ? date : date.toLocaleDateString()
             return dateString
         }
         else {
@@ -176,8 +174,10 @@ function MainScreen({window}) {
         //console.log(task.id)
         //const newList = taskList.filter(item => item.id != task.id) 
         //console.log(newList)
+        console.log("task id:", task.id)
         setTaskList(taskList.filter(item => item != task))
-        setStartID(taskList[0].id)
+        clearTask(task.id)
+        //setStartID(taskList[0].id)
     }
 
     const EditTaskView = ({task}) => {
@@ -194,7 +194,7 @@ function MainScreen({window}) {
             <CheckBox 
             disabled={false}
             value={subTaskCheckMap[item.id]} 
-            onc={
+            onChange={
                 () => {
                     //console.log("change")
                     //console.log(subTaskCheckMap)
@@ -260,7 +260,7 @@ function MainScreen({window}) {
         setAddingTask(false)
 
         //add subtask to subtask check map
-        newSubTaskCheckMap = subTaskCheckMap
+        let newSubTaskCheckMap = subTaskCheckMap
         for (let i = 0; i < addingSubTasks.length; i++) {
             newSubTaskCheckMap[addingSubTasks[i].id] = false
         }
