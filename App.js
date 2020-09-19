@@ -5,6 +5,10 @@ import { AppLoading } from 'expo';
 import AsyncStorage from '@react-native-community/async-storage'
 let GLOBAL_storedTasks = []
 
+function extractDate(datestr) {
+  return new Date(Date.parse(datestr))
+}
+
 clearAll = async () => {
   try {
     await AsyncStorage.clear()
@@ -12,7 +16,7 @@ clearAll = async () => {
     // clear error
   }
 
-  console.log('Done.')
+  //console.log('Done.')
 }
 
 const getAllTasks = async () => {
@@ -28,10 +32,10 @@ const getAllTasks = async () => {
               setEndID(0)
           } else {
 
-              console.log("start-end ids: ", startID, endID)
+              //console.log("start-end ids: ", startID, endID)
               
               for (let i = startID; i <= endID; i++) {
-                  console.log(`@task:${i}`)
+                  //console.log(`@task:${i}`)
                   
                   try {
                       let key = `@task:${i}`
@@ -39,7 +43,15 @@ const getAllTasks = async () => {
                       //console.log("jsonvalue retrieved", jsonValue)
 
                       if (typeof jsonValue === "object" && jsonValue != null) { 
-                          console.log("jsonValue: ", jsonValue)
+                          //console.log("jsonValue: ", jsonValue)
+                          if (jsonValue.date !== false) {
+                            jsonValue.date = extractDate(jsonValue.date)
+                          }
+
+                          if (jsonValue.time !== false) {
+                            jsonValue.time = extractDate(jsonValue.time)
+                          }
+
                           initTasks.push(jsonValue)
                       }
 
@@ -67,7 +79,7 @@ export default function App() {
   async function initialise() {
     //await clearAll()
 
-    console.log("initialise")
+    //console.log("initialise")
     GLOBAL_storedTasks = await getAllTasks()
     
   }

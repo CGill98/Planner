@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Planner",
+    "name": "Plan and Do",
     "slug": "Planner",
     "platforms": [
       "ios",
@@ -9,11 +9,11 @@
     ],
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./app/assets/icon.png",
+    "icon": "./app/assets/planner-icon.png",
     "splash": {
-      "image": "./app/assets/splash.png",
+      "image": "./app/assets/planner-icon-300.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#212437"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -23,7 +23,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      
+      "buildNumber" : "1.0.0",
+      "bundleIdentifier" : "COM.CAHGApps.PlanandDo",
       "config": {
 
         "googleMobileAdsAppId": "ca-app-pub-3088532579762761~8077128583"
@@ -31,7 +32,8 @@
     },
 
     "android": {
-
+      "versionCode" : 1,
+      "package" : "COM.CAHGApps.PlanandDo",
       "config": {
 
         "googleMobileAdsAppId": "ca-app-pub-3088532579762761~4235259950"
