@@ -19,10 +19,10 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#212437',
     },
     ad: {
-        width: "100%", backgroundColor:"white", alignSelf: "flex-end"
+        width: "100%", backgroundColor:"#212437", alignSelf: "flex-end"
     },
     taskSection: {
         flex: 1,
@@ -72,17 +72,19 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     addingTaskSection: {
-        backgroundColor: "#CCCCCC",
+        backgroundColor: "#212437",
         //flex: 1,
-        height: "96%",
+        height: "100%",
         justifyContent: "flex-start",
         //height:"70%"
     },
     addTaskInput: {
         backgroundColor:"white", 
         width:"50%",
+        padding: 2,
         borderRadius: 4,
-        height: "35%"
+        height: "35%",
+        justifyContent: "center"
     }
 })
 

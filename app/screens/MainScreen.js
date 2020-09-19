@@ -3,7 +3,7 @@ import {View, StyleSheet, Text, Div, Button, FlatList, TextInput, TouchableWitho
 import CheckBox from '@react-native-community/checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {styles, addingTaskSection} from "../assets/styles.js"
-import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
+import { AdMobBanner, PublisherBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import AsyncStorage from '@react-native-community/async-storage'
 import {setStartID, setEndID, storeTask, clearTask} from '../global/LocalStorage.js'
 
@@ -12,51 +12,12 @@ import {setStartID, setEndID, storeTask, clearTask} from '../global/LocalStorage
 //ca-app-pub-3088532579762761~8077128583 - IOS APP ID
 //ca-app-pub-3088532579762761/3946311880 - banner ad id IOS
 
-let initTasks = [{id: 0, title:"title", subTasks: [], date: false}] //
 //console.log("main screen.js")
-let subTaskCount = 0;
+
 async function testAds() {
     await setTestDeviceIDAsync('EMULATOR')
 
 } 
-/*
-//changes the start string for the tasks
-const setID = async (key, id) => {
-    try {
-        const IDstr = id.toString() 
-        console.log("IDstr: ", IDstr)
-        await AsyncStorage.setItem(key , IDstr)
-    } catch (e) {
-        // saving error
-        console.log(e)
-    }    
-}
-
-const setStartID = async (id) => {
-    setID("@startID", id)
-}
-
-const setEndID = async (id) => {
-    setID("@endID", id)
-}
-
-//store an object as a string, (use to store individual tasks)
-const storeTask = async (task) => {
-    try {
-        const jsonValue = JSON.stringify(task)
-        console.log("jsonValue: ",typeof jsonValue)
-        let key = `@task:${task.id}`
-        console.log("stored key: ", key)
-        await AsyncStorage.setItem(key , jsonValue)
-        setEndID(task.id)
-
-        const i = await AsyncStorage.getItem(key)
-        console.log("just stored: ", i)
-    } catch (e) {
-        // saving error
-        console.log(e)
-    }
-}*/
 
 const getAllTasks = async () => {
     //console.log("get all Tasks called")
@@ -79,18 +40,18 @@ const getAllTasks = async () => {
                 //console.log("start ID not null")
                 //console.log(startID)
                 //console.log(endID)
-                console.log("state-end ids: ", startID, endID)
+                //console.log("state-end ids: ", startID, endID)
                 
                 for (let i = startID; i <= endID; i++) {
-                    console.log(`@task:${i}`)
+                    //console.log(`@task:${i}`)
                     
                     try {
                         let key = `@task:${i}`
                         let jsonValue = JSON.parse(await AsyncStorage.getItem(key))
-                        console.log("jsonvalue retrieved", jsonValue)
+                        //console.log("jsonvalue retrieved", jsonValue)
 
                         if (typeof jsonValue === "object" && jsonValue != null) { 
-                            console.log("jsonValue: ", jsonValue)
+                            //console.log("jsonValue: ", jsonValue)
                             initTasks.push(jsonValue)
                         }
 
@@ -123,24 +84,11 @@ const getAllTasks = async () => {
   
 
 function MainScreen({window, storedTasks}) {
-    testAds()
-    console.log("stored tasks ", storedTasks)
+    //testAds()  
+    //setTimeout(()=>{console.log("timed out")}, 400)  
+    //console.log("stored tasks ", storedTasks)
     //replace below with getalltask
     const [taskList, setTaskList] = React.useState(storedTasks) //tasks stored in global map
-    //const [initialised, setInitialsed] = React.useState(false)
-
-    /*
-    if (!initialised) {
-        storeTask({id: 1, title:"new title", subTasks: [], date: false})
-         
-        var t = (async () => await getAllTasks())()
-
-        console.log("Get All Task", t)
-        //setTimeout(function(){}, 2000)
-        initTasks.push(t[0])
-        setTaskList(initTasks)
-        setInitialsed(true)    
-    }*/
 
     let MSState = new Map();
     MSState["tasks"] = [taskList, setTaskList]
@@ -148,20 +96,34 @@ function MainScreen({window, storedTasks}) {
     const [addingTask, setAddingTask] = React.useState(false)
     const [taskTitle, setTaskTitle] = React.useState("")
     const [showDatePicker, setShowDatePicker] = React.useState(false)
+    const [showTimePicker, setShowTimePicker] = React.useState(false)
     const [taskDate, setTaskDate] = React.useState(false)
+    const [taskTime, setTaskTime] = React.useState(false)
     const [editingTask, setEditingTask] = React.useState(-1) //the items id
-    const [numTasks, setNumTasks] = React.useState(taskList.length)
+    //console.log(`stored tasks last element: ${parseInt(storedTasks[storedTasks.length - 1].id)}`)
+    const length = 0 < storedTasks.length ? parseInt(storedTasks[storedTasks.length - 1].id) : 0
+    const [endID, setEndID] = React.useState(length)
     const [addTaskButtonTitle, setAddTaskButtonTitle] = React.useState("ADD TASK")
     const [addingSubTasks, setAddingSubTasks] = React.useState([])
     const [addNewSubTask, setAddNewSubTask] = React.useState(0)
     const [subTaskCheckMap, setSubTaskCheckMap] = React.useState({})
-    
+    //console.log(`type of endID: ${typeof endID}`)
     //console.log("initTasks length", initTasks.length)
-    //console.log("tasklist", taskList)
+    //console.log("tasklist", taskList)a
+    function timeToString(time) {
+        if (time) { //if date has been set
+            console.log(time)
+            let timeString = typeof time === "string" ? time : time.toLocaleTimeString('en-US').substring(0, 5)
+            return timeString
+        }
+        else {
+            return ""
+        }
+    }
 
     function dateToString(date) {
         if (date) { //if date has been set
-            
+            console.log(date)
             let dateString = typeof date === "string" ? date : date.toLocaleDateString()
             return dateString
         }
@@ -174,7 +136,7 @@ function MainScreen({window, storedTasks}) {
         //console.log(task.id)
         //const newList = taskList.filter(item => item.id != task.id) 
         //console.log(newList)
-        console.log("task id:", task.id)
+        //console.log("task id:", task.id)
         setTaskList(taskList.filter(item => item != task))
         clearTask(task.id)
         //setStartID(taskList[0].id)
@@ -236,6 +198,7 @@ function MainScreen({window, storedTasks}) {
                     <Text style={styles.taskTitle}>{item.title}</Text>
                     <SubTaskSection item={item}/>
                     {(item.date != false) ? <Text style={styles.extraDesc}>{"Due date: " + dateToString(item.date)}</Text> : <View/>}
+                    {(item.time != false) ? <Text style={styles.extraDesc}>{"Due date: " + timeToString(item.time)}</Text> : <View/>}
                     {(editingTask == item.id) ? <EditTaskView task={item}/> : <View/>}
                 </View>
             </TouchableWithoutFeedback>)
@@ -251,11 +214,15 @@ function MainScreen({window, storedTasks}) {
 
     const addTask = () => {
         let newTaskList = taskList
-        setNumTasks(numTasks + 1)
-        let newTask = {id: numTasks, title: taskTitle, subTasks: addingSubTasks, date: taskDate}
+        console.log(`endID: ${endID}`)
+        
+        console.log(`after endID: ${endID}`)
+        let newTask = {id: endID + 1, title: taskTitle, subTasks: addingSubTasks, date: taskDate, time: taskTime}
+        
         newTaskList.push(newTask)
         setTaskList(newTaskList)
         storeTask(newTask)
+        setEndID(endID + 1)    
         setTasksAdded(tasksAdded + 1)
         setAddingTask(false)
 
@@ -267,23 +234,44 @@ function MainScreen({window, storedTasks}) {
         setSubTaskCheckMap(newSubTaskCheckMap)
         setAddingSubTasks([])
         setTaskDate(false)
+        setTaskTime(false)
         setAddTaskButtonTitle("ADD TASK")
-
        
     }
     
+    const pickTime = (event, time) => {
+        setShowTimePicker(false)
+        setTaskTime(time)   
+    }
+
     const pickDate = (event, date) => {
         setShowDatePicker(false)
         setTaskDate(date)
         
     }
 
+    const TimePickerView = () => {
+        if (showTimePicker) {
+            return( 
+                    <DateTimePicker
+                    onChange={pickTime}
+                    mode="time"
+                    display="clock"
+                    value={new Date()}/>
+                )
+        }
+        else {
+            return(<View/>)
+        }
+    }
+
     const DatePickerView = () => {
         if (showDatePicker) {
             return( 
-                <DateTimePicker
-                onChange={pickDate}
-                value={new Date()}/>)
+                    <DateTimePicker
+                    onChange={pickDate}
+                    value={new Date()}/>
+                )
         }
         else {
             return(<View/>)
@@ -295,8 +283,8 @@ function MainScreen({window, storedTasks}) {
         if (addingTask) {
             return(
                 <View style={styles.addingTaskSection}>
-                    <View style={{height:"35%", justifyContent:"center", alignItems:"center"}}>
-                        <Text style={{fontSize:24}}>Task Title</Text>
+                    <View style={{height:"28%", justifyContent:"center", alignItems:"center", fontFamily:"sans-serif"}}>
+                        <Text style={{fontSize:24, color:"white"}}>Task Title</Text>
                         <TextInput onChangeText={(text) => setTaskTitle(text)} style={styles.addTaskInput}/>
                     </View>
                     {/*
@@ -321,18 +309,26 @@ function MainScreen({window, storedTasks}) {
                     </View>
                     */}
                     <View style={{height: "35%", justifyContent:"center", alignItems:"center"}}>
-                        <Text style={{fontSize:24}}>Add a completion date</Text>
-                        <Text style={{fontSize:12}}>(optional)</Text>
-                        <TouchableWithoutFeedback onPress={() => setShowDatePicker(true)}>
-                            <View style={styles.addTaskInput}>
-                                <Text>{dateToString(taskDate)}</Text>
-                            </View>
-                        </TouchableWithoutFeedback>
+                        <Text style={{fontSize:24, color: "white"}}>Add a completion date</Text>
+                        <Text style={{fontSize:12, color: "white"}}>(optional)</Text>
+                        <View style={{flexDirection: "row", alignItems:"center", justifyContent:"space-evenly", height: "50%", width:"85%"}}>
+                            <TouchableWithoutFeedback onPress={() => setShowTimePicker(true)}>
+                                <View style={{...styles.addTaskInput, width:"45%", height: "50%"}}>
+                                    <Text>{taskTime !== false ? timeToString(taskTime) : "Time"}</Text>
+                                </View>
+                            </TouchableWithoutFeedback>
+                            <TouchableWithoutFeedback onPress={() => setShowDatePicker(true)}>
+                                <View style={{...styles.addTaskInput, width:"45%", height: "50%"}}>
+                                    <Text>{taskDate !== false ? dateToString(taskDate) : "Date"}</Text>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View>
                     </View>
+                    {TimePickerView()}
                     {DatePickerView()}
-                    <View style={{height:"5%"}}/>
+                    <View style={{height:"9%"}}/>
                     <Button title="Add Task" onPress={()=>addTask()}
-                     color="black"/>
+                     color="#091225"/>
                 </View>
             )
             } else {
@@ -352,7 +348,7 @@ function MainScreen({window, storedTasks}) {
                             onPress={()=> {  
                                 setAddingTask(!addingTask); 
                                 setAddTaskButtonTitle(!addingTask ? "UNDO" : "ADD TASK");}} 
-                            title={addTaskButtonTitle} color="black"/>
+                            title={addTaskButtonTitle} color="#091225"/>
                         {AddTaskSection()}
                     </View>
                     <View style={styles.taskSection}>
@@ -370,7 +366,6 @@ function MainScreen({window, storedTasks}) {
             bannerSize="smartBannerPortrait"
             adUnitID="ca-app-pub-3088532579762761/1376344086" // Test ID, Replace with your-admob-unit-id
             style={styles.ad}
-            servePersonalizedAds={false}
             onDidFailToReceiveAdWithError={()=>console.log("add not loaded")}/>
         </View>
     );

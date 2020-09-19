@@ -43,7 +43,8 @@ const storeTask = async (task) => {
 
 const clearTask = async (id) => {
     try {
-        const key = `task:${id}` 
+        const key = `@task:${id}` 
+        console.log("key ", key)
         await AsyncStorage.removeItem(key)
         let startID = parseInt(await AsyncStorage.getItem("@startID"))
         let endID = parseInt(await AsyncStorage.getItem("@endID"))
@@ -69,7 +70,7 @@ const clearTask = async (id) => {
             }
         }  
         
-        if (id == endID) { //change StartID
+        if (id == endID) { //change endID
             for (let i = endID - 1; startID <= i; i--) {
                 const taskstr = await AsyncStorage.getItem(`@task:${i}`)
                 if (taskstr !== null) {
